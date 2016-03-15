@@ -1,0 +1,95 @@
+---
+jobs:
+- name: deploy-admin-ui-production
+  plan:
+  - aggregate:
+    - get: pipeline-tasks
+    - get: admin-ui-config
+    - get: admin-ui-release
+    - get: common-prod
+    - get: admin-ui-stemcell
+  - task: admin-ui-manifest
+    file: pipeline-tasks/spiff-merge.yml
+    config:
+      inputs:
+        - name: pipeline-tasks
+        - name: admin-ui-config
+        - name: common-prod
+      params:
+        OUTPUT_FILE: spiff-merge/manifest.yml
+        SOURCE_FILE: admin-ui-config/admin-ui.yml
+        MERGE_FILES: common-prod/secrets.yml
+  - put: admin-ui-production-deployment
+    params:
+      cert: common-prod/boshCA.crt
+      manifest: spiff-merge/manifest.yml
+      releases:
+        - admin-ui-release/*.tgz
+      stemcells:
+        - admin-ui-stemcell/*.tgz
+    on_failure:
+      put: slack
+      params:
+        text: |
+          :x: FAILED to deploy admin-ui on production
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+    on_success:
+      put: slack
+      params:
+        text: |
+          :white_check_mark: Successfully deployed admin-ui on production
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+
+
+resources:
+- name: common-prod
+  type: cg-common
+  source:
+    bucket_name: {{admin-ui-private-bucket-production}}
+    access_key_id: {{admin-ui-private-access-key-id-production}}
+    secret_access_key: {{admin-ui-private-secret-access-key-production}}
+    secrets_file: admin-ui.yml
+    secrets_passphrase: {{admin-ui-production-private-passphrase}}
+    bosh_cert: bosh.pem
+
+- name: admin-ui-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-community/admin-ui-boshrelease
+
+- name: admin-ui-config
+  type: git
+  source:
+    uri: {{cg-deploy-admin-ui-git-url}}
+    branch: {{cg-deploy-admin-ui-git-branch}}
+
+- name: admin-ui-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: {{admin-ui-stemcell}}
+
+- name: admin-ui-production-deployment
+  type: bosh-deployment
+  source:
+    target: {{admin-ui-production-deployment-bosh-target}}
+    username: {{admin-ui-production-deployment-bosh-username}}
+    password: {{admin-ui-production-deployment-bosh-password}}
+    deployment: {{admin-ui-production-deployment-bosh-deployment}}
+    ignore_ssl: false
+
+- name: pipeline-tasks
+  type: git
+  source:
+    uri: {{pipeline-tasks-git-url}}
+    branch: {{pipeline-tasks-git-branch}}
+
+- name: slack
+  type: slack-notification
+  source:
+    url: {{slack-webhook-url}}
