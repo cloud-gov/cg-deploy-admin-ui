@@ -6,6 +6,7 @@ jobs:
     - get: pipeline-tasks
     - get: admin-ui-config
     - get: admin-ui-release
+      trigger: true
     - get: common-prod
     - get: admin-ui-stemcell
   - task: admin-ui-manifest
