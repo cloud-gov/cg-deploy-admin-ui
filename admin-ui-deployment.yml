@@ -1,0 +1,118 @@
+---
+meta:
+  network: cf1
+  subdomain: (( merge || "admin" )
+  admin_ui_uaa_client:
+    id: (( merge || "admin-ui" ))
+    secret: (( merge ))
+
+name: admin-ui
+director_uuid: (( merge ))
+releases:
+  - name: admin-ui
+    version: latest
+  - name: collectd
+    version: latest
+compilation: (( merge ))
+update: (( merge ))
+networks: (( merge ))
+
+resource_pools:
+- name: medium_z1
+  network: (( meta.network ))
+  stemcell: (( merge ))
+  cloud_properties: (( merge ))
+
+jobs:
+- name: admin_ui
+  templates: 
+    - name: admin_ui
+      release: admin-ui
+    - name: collectd
+      release: collectd
+  instances: 1
+  resource_pool: medium_z1
+  persistent_disk: 5120
+  networks:
+    - name: (( meta.network ))
+      type: dynamic
+
+- name: register_admin_ui
+  templates: 
+    - name: register_admin_ui
+      release: admin-ui
+  instances: 1
+  resource_pool: medium_z1
+  lifecycle: errand
+  networks:
+    - name: (( meta.network ))
+
+- name: deregister_admin_ui
+  templates: 
+    - name: deregister_admin_ui
+      release: admin-ui
+  instances: 1
+  resource_pool: medium_z1
+  lifecycle: errand
+  networks:
+    - name: (( meta.network ))
+
+properties:
+  cc:
+    srv_api_uri: (( merge ))
+  system_domain: (( merge ))
+  uaa:
+    url: (( merge ))
+    admin:
+      client_secret: (( merge ))
+  collectd:
+    riemann_server: (( merge ))
+    hostname_prefix: (( merge ))
+  admin_ui:
+    cloud_controller_uri: (( properties.cc.srv_api_uri ))
+    cloud_controller_ssl_verify_none: (( properties.ssl.skip_cert_verify ))
+    uri: (( meta.subdomain "." properties.system_domain ))
+    users: ~
+    admins: (( merge ))
+    uaa:
+      url: (( properties.uaa.url ))
+      admin_client_secret: (( properties.uaa.admin.client_secret ))
+      client:
+        id: (( meta.admin_ui_uaa_client.id ))
+        secret: (( meta.admin_ui_uaa_client.secret ))
+      scopes:
+        admin: ~
+        user: ~
+  
+    ccdb: 
+      scheme: (( databases.db_scheme ))
+      address: (( databases.address ))
+      port: (( databases.port ))
+      username: (( databases.roles.ccadmin.username ))
+      password: (( databases.roles.ccadmin.password ))
+      database: ccdb
+    uaadb:
+      scheme: (( databases.db_scheme ))
+      address: (( databases.address ))
+      port: (( databases.port ))
+      username: (( databases.roles.uaaadmin.username ))
+      password: (( databases.roles.uaaadmin.password ))
+      database: uaadb
+
+  ssl:
+    skip_cert_verify: (( merge || false ))
+  networks:
+    apps: (( meta.network ))
+  nats:
+    user: (( merge ))
+    password: (( merge ))
+    port: (( merge ))
+    machines: (( merge ))
+    address: (( machines.[0] ))
+  databases: 
+    db_scheme: (( merge ))
+    address: (( merge ))
+    port: (( merge ))
+    roles: (( merge ))
+
+
