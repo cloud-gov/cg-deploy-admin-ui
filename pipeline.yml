@@ -5,6 +5,7 @@ jobs:
   - aggregate:
     - get: pipeline-tasks
     - get: admin-ui-config
+      trigger: true
     - get: admin-ui-release
       trigger: true
     - get: common-prod
@@ -18,7 +19,7 @@ jobs:
         - name: common-prod
       params:
         OUTPUT_FILE: spiff-merge/manifest.yml
-        SOURCE_FILE: admin-ui-config/admin-ui.yml
+        SOURCE_FILE: admin-ui-config/admin-ui-deployment.yml
         MERGE_FILES: common-prod/secrets.yml
   - put: admin-ui-production-deployment
     params:
