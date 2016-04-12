@@ -77,7 +77,7 @@ resources:
     name: {{admin-ui-stemcell}}
 
 - name: admin-ui-production-deployment
-  type: bosh-deployment
+  type: 18f-bosh-deployment
   source:
     target: {{admin-ui-production-deployment-bosh-target}}
     username: {{admin-ui-production-deployment-bosh-username}}
