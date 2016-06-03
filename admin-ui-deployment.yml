@@ -13,6 +13,16 @@ releases:
     version: latest
   - name: collectd
     version: latest
+  - name: fisma
+    version: latest
+  - name: tripwire
+    version: latest
+  - name: awslogs
+    version: latest
+  - name: nessus-agent
+    version: latest
+  - name: newrelic
+    version: latest
 compilation: (( merge ))
 update: (( merge ))
 networks: (( merge ))
@@ -30,6 +40,16 @@ jobs:
       release: admin-ui
     - name: collectd
       release: collectd
+    - name: harden
+      release: fisma
+    - name: tripwire
+      release: tripwire
+    - name: awslogs
+      release: awslogs
+    - name: nessus-agent
+      release: nessus-agent
+    - name: newrelic-monitor
+      release: newrelic
   instances: 1
   resource_pool: medium_z1
   persistent_disk: 5120
@@ -65,6 +85,10 @@ properties:
     url: (( merge ))
     admin:
       client_secret: (( merge ))
+  tripwire: (( merge ))
+  awslogs: (( merge ))
+  nessus-agent: (( merge ))
+  newrelic: (( merge ))
   collectd:
     riemann_server: (( merge ))
     hostname_prefix: (( merge ))
