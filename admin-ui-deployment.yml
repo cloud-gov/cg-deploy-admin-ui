@@ -17,6 +17,10 @@ releases:
     version: latest
   - name: tripwire
     version: latest
+  - name: clamav
+    version: latest
+  - name: riemannc
+    version: latest
   - name: awslogs
     version: latest
   - name: nessus-agent
@@ -44,6 +48,10 @@ jobs:
       release: fisma
     - name: tripwire
       release: tripwire
+    - name: clamav
+      release: clamav
+    - name: riemannc
+      release: riemannc
     - name: awslogs
       release: awslogs
     - name: nessus-agent
@@ -92,6 +100,10 @@ properties:
   collectd:
     riemann_server: (( merge ))
     hostname_prefix: (( merge ))
+
+  riemann:
+    server: (( properties.collectd.riemann_server ))
+    port: 5555
   admin_ui:
     cloud_controller_uri: (( properties.cc.srv_api_uri ))
     cloud_controller_ssl_verify_none: (( properties.ssl.skip_cert_verify ))
