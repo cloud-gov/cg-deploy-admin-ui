@@ -37,9 +37,15 @@ resource_pools:
   stemcell: (( merge ))
   cloud_properties: (( merge ))
 
+disk_pools:
+- name: admin-ui
+  disk_size: 5_120
+  cloud_properties:
+    encrypted: true
+
 jobs:
 - name: admin_ui
-  templates: 
+  templates:
     - name: admin_ui
       release: admin-ui
     - name: collectd
@@ -60,13 +66,13 @@ jobs:
       release: newrelic
   instances: 1
   resource_pool: medium_z1
-  persistent_disk: 5120
+  persistent_disk_pool: admin-ui
   networks:
     - name: (( meta.network ))
       type: dynamic
 
 - name: register_admin_ui
-  templates: 
+  templates:
     - name: register_admin_ui
       release: admin-ui
   instances: 1
@@ -76,7 +82,7 @@ jobs:
     - name: (( meta.network ))
 
 - name: deregister_admin_ui
-  templates: 
+  templates:
     - name: deregister_admin_ui
       release: admin-ui
   instances: 1
@@ -119,8 +125,8 @@ properties:
       scopes:
         admin: ~
         user: ~
-  
-    ccdb: 
+
+    ccdb:
       scheme: (( databases.db_scheme ))
       address: (( databases.address ))
       port: (( databases.port ))
@@ -145,10 +151,8 @@ properties:
     port: (( merge ))
     machines: (( merge ))
     address: (( machines.[0] ))
-  databases: 
+  databases:
     db_scheme: (( merge ))
     address: (( merge ))
     port: (( merge ))
     roles: (( merge ))
-
-
