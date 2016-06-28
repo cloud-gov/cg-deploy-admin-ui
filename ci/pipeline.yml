@@ -1,25 +1,75 @@
 ---
 jobs:
-- name: deploy-admin-ui-production
+- name: deploy-admin-ui-staging
   plan:
   - aggregate:
     - get: pipeline-tasks
-    - get: admin-ui-config
+    - get: admin-ui-config-staging
       trigger: true
     - get: admin-ui-release
       trigger: true
-    - get: common-prod
-    - get: admin-ui-stemcell
+    - get: common-stage
+    - get: admin-ui-stemcell-staging
   - task: admin-ui-manifest
     file: pipeline-tasks/spiff-merge.yml
     config:
       inputs:
         - name: pipeline-tasks
-        - name: admin-ui-config
+        - name: admin-ui-config-staging
+        - name: common-stage
+      params:
+        OUTPUT_FILE: spiff-merge/manifest-staging.yml
+        SOURCE_FILE: admin-ui-config-staging/admin-ui-deployment.yml
+        MERGE_FILES: common-stage/secrets.yml
+  - put: admin-ui-staging-deployment
+    params:
+      cert: common-stage/boshCA.crt
+      manifest: spiff-merge/manifest-staging.yml
+      releases:
+        - admin-ui-release/*.tgz
+      stemcells:
+        - admin-ui-stemcell-staging/*.tgz
+    on_failure:
+      put: slack
+      params:
+        text: |
+          :x: FAILED to deploy admin-ui on staging
+          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        :icon_url {{slack-icon-url}}
+    on_success:
+      put: slack
+      params:
+        text: |
+          :white_check_mark: Successfully deployed admin-ui on staging
+          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+
+- name: deploy-admin-ui-production
+  plan:
+  - aggregate:
+    - get: pipeline-tasks
+    - get: deploy-admin-ui-staging
+    - get: admin-ui-config-production
+      trigger: true
+    - get: admin-ui-release
+      trigger: false
+      passed: [admin-ui-staging-deployment]
+    - get: common-prod
+    - get: admin-ui-stemcell-production
+  - task: admin-ui-manifest
+    file: pipeline-tasks/spiff-merge.yml
+    config:
+      inputs:
+        - name: pipeline-tasks
+        - name: admin-ui-config-production
         - name: common-prod
       params:
         OUTPUT_FILE: spiff-merge/manifest.yml
-        SOURCE_FILE: admin-ui-config/admin-ui-deployment.yml
+        SOURCE_FILE: admin-ui-config-production/admin-ui-deployment.yml
         MERGE_FILES: common-prod/secrets.yml
   - put: admin-ui-production-deployment
     params:
@@ -28,7 +78,7 @@ jobs:
       releases:
         - admin-ui-release/*.tgz
       stemcells:
-        - admin-ui-stemcell/*.tgz
+        - admin-ui-stemcell-production/*.tgz
     on_failure:
       put: slack
       params:
@@ -50,13 +100,24 @@ jobs:
 
 
 resources:
+- name: common-stage
+  type: cg-common
+  source:
+    bucket_name: {{admin-ui-private-bucket-staging}}
+    access_key_id: {{admin-ui-private-access-key-id-staging}}
+    secret_access_key: {{admin-ui-private-secret-access-key-staging}}
+    secrets_file: secrets.yml
+    secrets_passphrase: {{admin-ui-staging-private-passphrase}}
+    bosh_cert: bosh.pem
+    region: {{aws-region}}
+
 - name: common-prod
   type: cg-common
   source:
     bucket_name: {{admin-ui-private-bucket-production}}
     access_key_id: {{admin-ui-private-access-key-id-production}}
     secret_access_key: {{admin-ui-private-secret-access-key-production}}
-    secrets_file: admin-ui.yml
+    secrets_file: secrets.yml
     secrets_passphrase: {{admin-ui-production-private-passphrase}}
     bosh_cert: bosh.pem
     region: {{aws-region}}
@@ -66,13 +127,28 @@ resources:
   source:
     repository: cloudfoundry-community/admin-ui-boshrelease
 
-- name: admin-ui-config
+- name: admin-ui-config-staging
   type: git
   source:
     uri: {{cg-deploy-admin-ui-git-url}}
-    branch: {{cg-deploy-admin-ui-git-branch}}
+    branch: {{cg-deploy-admin-ui-git-branch-staging}}
 
-- name: admin-ui-stemcell
+- name: admin-ui-config-production
+  type: git
+  source:
+    uri: {{cg-deploy-admin-ui-git-url}}
+    branch: {{cg-deploy-admin-ui-git-branch-production}}
+
+- name: admin-ui-stemcell-staging
+  type: s3
+  source:
+    access_key_id: {{admin-ui-private-access-key-id-staging}}
+    bucket: {{stemcell-bucket}}
+    regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
+    region_name: {{aws-region}}
+    secret_access_key: {{admin-ui-private-secret-access-key-staging}}
+
+- name: admin-ui-stemcell-production
   type: s3
   source:
     access_key_id: {{admin-ui-private-access-key-id-production}}
@@ -80,6 +156,15 @@ resources:
     regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
     region_name: {{aws-region}}
     secret_access_key: {{admin-ui-private-secret-access-key-production}}
+
+- name: admin-ui-staging-deployment
+  type: 18f-bosh-deployment
+  source:
+    target: {{admin-ui-staging-deployment-bosh-target}}
+    username: {{admin-ui-staging-deployment-bosh-username}}
+    password: {{admin-ui-staging-deployment-bosh-password}}
+    deployment: {{admin-ui-staging-deployment-bosh-deployment}}
+    ignore_ssl: false
 
 - name: admin-ui-production-deployment
   type: 18f-bosh-deployment
