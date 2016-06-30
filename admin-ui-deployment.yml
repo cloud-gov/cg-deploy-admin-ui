@@ -19,6 +19,8 @@ releases:
     version: latest
   - name: clamav
     version: latest
+  - name: snort
+    version: latest
   - name: riemannc
     version: latest
   - name: awslogs
@@ -56,6 +58,8 @@ jobs:
       release: tripwire
     - name: clamav
       release: clamav
+    - name: snort
+      release: snort
     - name: riemannc
       release: riemannc
     - name: awslogs
