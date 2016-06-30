@@ -54,9 +54,9 @@ jobs:
     - get: pipeline-tasks
     - get: admin-ui-config-production
       trigger: false
-      passed: [deploy-admin-ui-staging]
     - get: admin-ui-release
       trigger: false
+      passed: [deploy-admin-ui-staging]
     - get: common-prod
     - get: admin-ui-stemcell
   - task: admin-ui-manifest
