@@ -9,7 +9,7 @@ jobs:
     - get: admin-ui-release
       trigger: true
     - get: common-stage
-    - get: admin-ui-stemcell-staging
+    - get: admin-ui-stemcell
   - task: admin-ui-manifest
     file: pipeline-tasks/spiff-merge.yml
     config:
@@ -28,7 +28,7 @@ jobs:
       releases:
         - admin-ui-release/*.tgz
       stemcells:
-        - admin-ui-stemcell-staging/*.tgz
+        - admin-ui-stemcell/*.tgz
     on_failure:
       put: slack
       params:
@@ -37,7 +37,7 @@ jobs:
           <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
         channel: {{slack-channel}}
         username: {{slack-username}}
-        :icon_url {{slack-icon-url}}
+        icon_url: {{slack-icon-url}}
     on_success:
       put: slack
       params:
@@ -52,14 +52,13 @@ jobs:
   plan:
   - aggregate:
     - get: pipeline-tasks
-    - get: deploy-admin-ui-staging
     - get: admin-ui-config-production
       trigger: true
     - get: admin-ui-release
       trigger: false
-      passed: [admin-ui-staging-deployment]
+      passed: [deploy-admin-ui-staging]
     - get: common-prod
-    - get: admin-ui-stemcell-production
+    - get: admin-ui-stemcell
   - task: admin-ui-manifest
     file: pipeline-tasks/spiff-merge.yml
     config:
@@ -78,7 +77,7 @@ jobs:
       releases:
         - admin-ui-release/*.tgz
       stemcells:
-        - admin-ui-stemcell-production/*.tgz
+        - admin-ui-stemcell/*.tgz
     on_failure:
       put: slack
       params:
@@ -139,16 +138,7 @@ resources:
     uri: {{cg-deploy-admin-ui-git-url}}
     branch: {{cg-deploy-admin-ui-git-branch-production}}
 
-- name: admin-ui-stemcell-staging
-  type: s3
-  source:
-    access_key_id: {{admin-ui-private-access-key-id-staging}}
-    bucket: {{stemcell-bucket}}
-    regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
-    region_name: {{aws-region}}
-    secret_access_key: {{admin-ui-private-secret-access-key-staging}}
-
-- name: admin-ui-stemcell-production
+- name: admin-ui-stemcell
   type: s3
   source:
     access_key_id: {{admin-ui-private-access-key-id-production}}
