@@ -29,6 +29,15 @@ jobs:
         - admin-ui-release/*.tgz
       stemcells:
         - admin-ui-stemcell/*.tgz
+  - task: admin-ui-errand
+    file: pipeline-tasks/bosh-errand.yml
+    params:
+      BOSH_TARGET: {{admin-ui-deployment-bosh-target}}
+      BOSH_USERNAME: {{admin-ui-deployment-bosh-username}}
+      BOSH_PASSWORD: {{admin-ui-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{admin-ui-deployment-bosh-deployment}}
+      BOSH_ERRAND: register_admin_ui
+      BOSH_CACERT: common/boshCA.crt
     on_failure:
       put: slack
       params:
@@ -78,6 +87,15 @@ jobs:
         - admin-ui-release/*.tgz
       stemcells:
         - admin-ui-stemcell/*.tgz
+  - task: admin-ui-errand
+    file: pipeline-tasks/bosh-errand.yml
+    params:
+      BOSH_TARGET: {{admin-ui-deployment-bosh-target}}
+      BOSH_USERNAME: {{admin-ui-deployment-bosh-username}}
+      BOSH_PASSWORD: {{admin-ui-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{admin-ui-deployment-bosh-deployment}}
+      BOSH_ERRAND: register_admin_ui
+      BOSH_CACERT: common/boshCA.crt
     on_failure:
       put: slack
       params:
