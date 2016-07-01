@@ -37,7 +37,7 @@ jobs:
       BOSH_PASSWORD: {{admin-ui-staging-deployment-bosh-password}}
       BOSH_DEPLOYMENT_NAME: {{admin-ui-staging-deployment-bosh-deployment}}
       BOSH_ERRAND: register_admin_ui
-      BOSH_CACERT: common/boshCA.crt
+      BOSH_CACERT: common-stage/boshCA.crt
     on_failure:
       put: slack
       params:
@@ -95,7 +95,7 @@ jobs:
       BOSH_PASSWORD: {{admin-ui-production-deployment-bosh-password}}
       BOSH_DEPLOYMENT_NAME: {{admin-ui-production-deployment-bosh-deployment}}
       BOSH_ERRAND: register_admin_ui
-      BOSH_CACERT: common/boshCA.crt
+      BOSH_CACERT: common-prod/boshCA.crt
     on_failure:
       put: slack
       params:
