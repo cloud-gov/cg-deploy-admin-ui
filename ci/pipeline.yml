@@ -32,10 +32,10 @@ jobs:
   - task: admin-ui-errand
     file: pipeline-tasks/bosh-errand.yml
     params:
-      BOSH_TARGET: {{admin-ui-deployment-bosh-target}}
-      BOSH_USERNAME: {{admin-ui-deployment-bosh-username}}
-      BOSH_PASSWORD: {{admin-ui-deployment-bosh-password}}
-      BOSH_DEPLOYMENT_NAME: {{admin-ui-deployment-bosh-deployment}}
+      BOSH_TARGET: {{admin-ui-staging-deployment-bosh-target}}
+      BOSH_USERNAME: {{admin-ui-staging-deployment-bosh-username}}
+      BOSH_PASSWORD: {{admin-ui-staging-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{admin-ui-staging-deployment-bosh-deployment}}
       BOSH_ERRAND: register_admin_ui
       BOSH_CACERT: common/boshCA.crt
     on_failure:
@@ -90,10 +90,10 @@ jobs:
   - task: admin-ui-errand
     file: pipeline-tasks/bosh-errand.yml
     params:
-      BOSH_TARGET: {{admin-ui-deployment-bosh-target}}
-      BOSH_USERNAME: {{admin-ui-deployment-bosh-username}}
-      BOSH_PASSWORD: {{admin-ui-deployment-bosh-password}}
-      BOSH_DEPLOYMENT_NAME: {{admin-ui-deployment-bosh-deployment}}
+      BOSH_TARGET: {{admin-ui-production-deployment-bosh-target}}
+      BOSH_USERNAME: {{admin-ui-production-deployment-bosh-username}}
+      BOSH_PASSWORD: {{admin-ui-production-deployment-bosh-password}}
+      BOSH_DEPLOYMENT_NAME: {{admin-ui-production-deployment-bosh-deployment}}
       BOSH_ERRAND: register_admin_ui
       BOSH_CACERT: common/boshCA.crt
     on_failure:
