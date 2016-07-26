@@ -2,8 +2,9 @@
 meta:
   network: cf1
   subdomain: (( merge || "admin" )
-  availability_zone: ~
-  availability_zone2: ~
+  aws:
+    availability_zone: ~
+    availability_zone2: ~
   admin_ui_uaa_client:
     id: (( merge || "admin-ui" ))
     secret: (( merge ))
