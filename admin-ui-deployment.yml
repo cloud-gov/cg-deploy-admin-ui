@@ -2,9 +2,6 @@
 meta:
   network: cf1
   subdomain: (( merge || "admin" )
-  aws:
-    availability_zone: ~
-    availability_zone2: ~
   admin_ui_uaa_client:
     id: (( merge || "admin-ui" ))
     secret: (( merge ))
@@ -38,14 +35,12 @@ networks: (( merge ))
 
 resource_pools:
 - name: medium_z1
-  availability_zone: (( meta.aws.availability_zone ))
   network: (( meta.network ))
   stemcell: (( merge ))
   cloud_properties: (( merge ))
 
 disk_pools:
 - name: admin-ui
-  availability_zone: (( meta.aws.availability_zone ))
   disk_size: 5_120
   cloud_properties:
     encrypted: true
