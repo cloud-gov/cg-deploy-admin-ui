@@ -9,6 +9,7 @@ jobs:
     - get: admin-ui-release
       trigger: true
     - get: common-stage
+      trigger: true
     - get: admin-ui-stemcell
   - task: admin-ui-manifest
     file: pipeline-tasks/spiff-merge.yml
@@ -51,9 +52,9 @@ jobs:
   plan:
   - aggregate:
     - get: pipeline-tasks
-    - get: common
-      resource: common-stage
+    - get: admin-ui-staging-deployment
       passed: [deploy-admin-ui-staging]
+      trigger: true
   - task: admin-ui-errand
     file: pipeline-tasks/bosh-errand.yml
     params:
@@ -74,6 +75,7 @@ jobs:
       trigger: true
       passed: [deploy-admin-ui-staging]
     - get: common-prod
+      trigger: true
     - get: admin-ui-stemcell
   - task: admin-ui-manifest
     file: pipeline-tasks/spiff-merge.yml
@@ -116,9 +118,9 @@ jobs:
   plan:
   - aggregate:
     - get: pipeline-tasks
-    - get: common
-      resource: common-prod
+    - get: admin-ui-production-deployment
       passed: [deploy-admin-ui-production]
+      trigger: true
   - task: admin-ui-errand
     file: pipeline-tasks/bosh-errand.yml
     params:
