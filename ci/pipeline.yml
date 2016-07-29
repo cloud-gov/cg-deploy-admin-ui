@@ -52,6 +52,8 @@ jobs:
   plan:
   - aggregate:
     - get: pipeline-tasks
+    - get: common
+      resource: common-stage
     - get: admin-ui-staging-deployment
       passed: [deploy-admin-ui-staging]
       trigger: true
@@ -118,6 +120,8 @@ jobs:
   plan:
   - aggregate:
     - get: pipeline-tasks
+    - get: common
+      resource: common-prod
     - get: admin-ui-production-deployment
       passed: [deploy-admin-ui-production]
       trigger: true
