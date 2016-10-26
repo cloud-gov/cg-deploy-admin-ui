@@ -80,6 +80,7 @@ jobs:
     - get: common-prod
       trigger: true
     - get: admin-ui-stemcell
+      trigger: true
   - task: admin-ui-manifest
     file: pipeline-tasks/spiff-merge.yml
     config:
