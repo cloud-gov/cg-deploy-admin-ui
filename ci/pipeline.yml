@@ -81,6 +81,7 @@ jobs:
       trigger: true
     - get: admin-ui-stemcell
       trigger: true
+      passed: [deploy-admin-ui-staging]
   - task: admin-ui-manifest
     file: pipeline-tasks/spiff-merge.yml
     config:
