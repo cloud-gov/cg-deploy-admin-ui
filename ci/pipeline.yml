@@ -4,33 +4,53 @@ jobs:
   plan:
   - aggregate:
     - get: pipeline-tasks
-    - get: admin-ui-config-staging
+    - get: admin-ui-config
+      resource: admin-ui-config-staging
       trigger: true
     - get: admin-ui-release
       trigger: true
-    - get: common-stage
+    - get: common
+      resource: common-stage
       trigger: true
     - get: admin-ui-stemcell
       trigger: true
-  - task: admin-ui-manifest
-    file: pipeline-tasks/spiff-merge.yml
-    config:
-      inputs:
-        - name: pipeline-tasks
-        - name: admin-ui-config-staging
-        - name: common-stage
-      params:
-        OUTPUT_FILE: spiff-merge/manifest-staging.yml
-        SOURCE_FILE: admin-ui-config-staging/admin-ui-deployment.yml
-        MERGE_FILES: common-stage/secrets.yml
-  - put: admin-ui-staging-deployment
+    - get: terraform-state
+      resource: state-file-staging
+      trigger: true
+  - task: terraform-state-to-yaml
+    file: pipeline-tasks/terraform-state-to-yaml.yml
     params:
-      cert: common-stage/boshCA.crt
-      manifest: spiff-merge/manifest-staging.yml
+      STATE_FILE: terraform.tfstate
+  - task: admin-ui-manifest
+    config: &manifest-config
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: 18fgsa/concourse-task
+      inputs:
+      - name: admin-ui-config
+      - name: terraform-yaml
+      - name: common
+      outputs:
+      - name: admin-manifest
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          admin-ui-config/generate-manifest.sh \
+            terraform-yaml/state.yml \
+            common/secrets.yml \
+            > admin-manifest/manifest.yml
+  - put: admin-ui-staging-deployment
+    params: &deploy-params
+      cert: common/boshCA.crt
+      manifest: admin-manifest/manifest.yml
       releases:
-        - admin-ui-release/*.tgz
+      - admin-ui-release/*.tgz
       stemcells:
-        - admin-ui-stemcell/*.tgz
+      - admin-ui-stemcell/*.tgz
     on_failure:
       put: slack
       params:
@@ -49,6 +69,7 @@ jobs:
         channel: {{slack-channel}}
         username: {{slack-username}}
         icon_url: {{slack-icon-url}}
+
 - name: register-admin-ui-staging
   plan:
   - aggregate:
@@ -72,35 +93,29 @@ jobs:
   plan:
   - aggregate:
     - get: pipeline-tasks
-    - get: admin-ui-config-production
+    - get: admin-ui-config
+      resource: admin-ui-config-production
       trigger: true
     - get: admin-ui-release
-      trigger: true
       passed: [deploy-admin-ui-staging]
-    - get: common-prod
+      trigger: true
+    - get: common
+      resource: common-prod
       trigger: true
     - get: admin-ui-stemcell
-      trigger: true
       passed: [deploy-admin-ui-staging]
-  - task: admin-ui-manifest
-    file: pipeline-tasks/spiff-merge.yml
-    config:
-      inputs:
-        - name: pipeline-tasks
-        - name: admin-ui-config-production
-        - name: common-prod
-      params:
-        OUTPUT_FILE: spiff-merge/manifest.yml
-        SOURCE_FILE: admin-ui-config-production/admin-ui-deployment.yml
-        MERGE_FILES: common-prod/secrets.yml
-  - put: admin-ui-production-deployment
+      trigger: true
+    - get: terraform-state
+      resource: state-file-production
+      trigger: true
+  - task: terraform-state-to-yaml
+    file: pipeline-tasks/terraform-state-to-yaml.yml
     params:
-      cert: common-prod/boshCA.crt
-      manifest: spiff-merge/manifest.yml
-      releases:
-        - admin-ui-release/*.tgz
-      stemcells:
-        - admin-ui-stemcell/*.tgz
+      STATE_FILE: terraform.tfstate
+  - task: admin-ui-manifest
+    config: *manifest-config
+  - put: admin-ui-production-deployment
+    params: *deploy-params
     on_failure:
       put: slack
       params:
@@ -119,6 +134,7 @@ jobs:
         channel: {{slack-channel}}
         username: {{slack-username}}
         icon_url: {{slack-icon-url}}
+
 - name: register-admin-ui-production
   plan:
   - aggregate:
@@ -211,6 +227,24 @@ resources:
     uri: {{pipeline-tasks-git-url}}
     branch: {{pipeline-tasks-git-branch}}
 
+- name: state-file-staging
+  type: s3
+  source:
+    bucket: {{tf-state-bucket-staging}}
+    versioned_file: {{tf-state-file-staging}}
+    access_key_id: {{admin-ui-private-access-key-id-staging}}
+    secret_access_key: {{admin-ui-private-secret-access-key-staging}}
+    region_name: {{aws-region}}
+
+- name: state-file-production
+  type: s3
+  source:
+    bucket: {{tf-state-bucket-production}}
+    versioned_file: {{tf-state-file-production}}
+    access_key_id: {{admin-ui-private-access-key-id-production}}
+    secret_access_key: {{admin-ui-private-secret-access-key-production}}
+    region_name: {{aws-region}}
+
 - name: slack
   type: slack-notification
   source:
@@ -221,10 +255,12 @@ resource_types:
   type: docker-image
   source:
     repository: cfcommunity/slack-notification-resource
+
 - name: 18f-bosh-deployment
   type: docker-image
   source:
     repository: 18fgsa/bosh-deployment-resource
+
 - name: cg-common
   type: docker-image
   source:

@@ -1,43 +1,49 @@
 ---
 meta:
   network: cf1
-  subdomain: (( merge || "admin" )
+  subdomain: admin
   admin_ui_uaa_client:
-    id: (( merge || "admin-ui" ))
-    secret: (( merge ))
+    id: admin-ui
+    secret: (( param "specify uaa client secret" ))
 
 name: admin-ui
-director_uuid: (( merge ))
+director_uuid: (( param "specify director uuid" ))
 releases:
-  - name: admin-ui
-    version: latest
-  - name: collectd
-    version: latest
-  - name: fisma
-    version: latest
-  - name: tripwire
-    version: latest
-  - name: clamav
-    version: latest
-  - name: snort
-    version: latest
-  - name: riemannc
-    version: latest
-  - name: awslogs
-    version: latest
-  - name: nessus-agent
-    version: latest
-  - name: newrelic
-    version: latest
-compilation: (( merge ))
-update: (( merge ))
-networks: (( merge ))
+- name: admin-ui
+  version: latest
+- name: collectd
+  version: latest
+- name: fisma
+  version: latest
+- name: tripwire
+  version: latest
+- name: clamav
+  version: latest
+- name: snort
+  version: latest
+- name: riemannc
+  version: latest
+- name: awslogs
+  version: latest
+- name: nessus-agent
+  version: latest
+- name: newrelic
+  version: latest
+compilation: (( param "specify compilation" ))
+update: (( param "specify update" ))
+
+networks:
+- name: default
+  type: dynamic
+  cloud_properties:
+    subnet: (( grab terraform_outputs.private_subnet_az1 ))
+    security_groups:
+    - (( grab terraform_outputs.bosh_security_group ))
 
 resource_pools:
 - name: medium_z1
-  network: (( meta.network ))
-  stemcell: (( merge ))
-  cloud_properties: (( merge ))
+  network: (( grab meta.network ))
+  stemcell: (( param "specify stemcell" ))
 
 disk_pools:
 - name: admin-ui
@@ -48,115 +54,114 @@ disk_pools:
 jobs:
 - name: admin_ui
   templates:
-    - name: admin_ui
-      release: admin-ui
-    - name: collectd
-      release: collectd
-    - name: harden
-      release: fisma
-    - name: tripwire
-      release: tripwire
-    - name: clamav
-      release: clamav
-    - name: snort
-      release: snort
-    - name: riemannc
-      release: riemannc
-    - name: awslogs
-      release: awslogs
-    - name: nessus-agent
-      release: nessus-agent
-    - name: newrelic-monitor
-      release: newrelic
+  - name: admin_ui
+    release: admin-ui
+  - name: collectd
+    release: collectd
+  - name: harden
+    release: fisma
+  - name: tripwire
+    release: tripwire
+  - name: clamav
+    release: clamav
+  - name: snort
+    release: snort
+  - name: riemannc
+    release: riemannc
+  - name: awslogs
+    release: awslogs
+  - name: nessus-agent
+    release: nessus-agent
+  - name: newrelic-monitor
+    release: newrelic
   instances: 1
   resource_pool: medium_z1
   persistent_disk_pool: admin-ui
   networks:
-    - name: (( meta.network ))
-      type: dynamic
+  - name: (( grab meta.network ))
+    type: dynamic
 
 - name: register_admin_ui
   templates:
-    - name: register_admin_ui
-      release: admin-ui
+  - name: register_admin_ui
+    release: admin-ui
   instances: 1
   resource_pool: medium_z1
   lifecycle: errand
   networks:
-    - name: (( meta.network ))
+  - name: (( grab meta.network ))
 
 - name: deregister_admin_ui
   templates:
-    - name: deregister_admin_ui
-      release: admin-ui
+  - name: deregister_admin_ui
+    release: admin-ui
   instances: 1
   resource_pool: medium_z1
   lifecycle: errand
   networks:
-    - name: (( meta.network ))
+  - name: (( grab meta.network ))
 
 properties:
   cc:
-    srv_api_uri: (( merge ))
-  system_domain: (( merge ))
+    srv_api_uri: (( param "specify cc api url" ))
+  system_domain: (( param "specify system domain" ))
   uaa:
-    url: (( merge ))
+    url: (( param "specify uaa url" ))
     admin:
-      client_secret: (( merge ))
-  tripwire: (( merge ))
-  awslogs: (( merge ))
-  nessus-agent: (( merge ))
-  newrelic: (( merge ))
+      client_secret: (( param "specify uaa client secret" ))
+  tripwire: (( param "specify tripwire properties" ))
+  awslogs: (( param "specify awslogs properties" ))
+  nessus-agent: (( param "specify nessus properties" ))
+  newrelic: (( param "specify newrelic properties" ))
   collectd:
-    riemann_server: (( merge ))
-    hostname_prefix: (( merge ))
+    riemann_server: (( param "specify riemann host" ))
+    hostname_prefix: (( param "specify collectd prefix" ))
 
   riemann:
-    server: (( properties.collectd.riemann_server ))
+    server: (( grab properties.collectd.riemann_server ))
     port: 5555
   admin_ui:
-    cloud_controller_uri: (( properties.cc.srv_api_uri ))
-    cloud_controller_ssl_verify_none: (( properties.ssl.skip_cert_verify ))
-    uri: (( meta.subdomain "." properties.system_domain ))
+    cloud_controller_uri: (( grab properties.cc.srv_api_uri ))
+    cloud_controller_ssl_verify_none: (( grab properties.ssl.skip_cert_verify ))
+    uri: (( concat meta.subdomain "." properties.system_domain ))
     users: ~
-    admins: (( merge ))
+    admins: (( param "specify admins" ))
     uaa:
-      url: (( properties.uaa.url ))
-      admin_client_secret: (( properties.uaa.admin.client_secret ))
+      url: (( grab properties.uaa.url ))
+      admin_client_secret: (( grab properties.uaa.admin.client_secret ))
       client:
-        id: (( meta.admin_ui_uaa_client.id ))
-        secret: (( meta.admin_ui_uaa_client.secret ))
+        id: (( grab meta.admin_ui_uaa_client.id ))
+        secret: (( grab meta.admin_ui_uaa_client.secret ))
       scopes:
         admin: ~
         user: ~
 
     ccdb:
-      scheme: (( databases.db_scheme ))
-      address: (( databases.address ))
-      port: (( databases.port ))
-      username: (( databases.roles.ccadmin.username ))
-      password: (( databases.roles.ccadmin.password ))
+      scheme: postgres
+      # scheme: (( grab terraform_outputs.engine ))
+      address: (( grab terraform_outputs.cf_rds_host ))
+      port: (( grab terraform_outputs.cf_rds_port ))
+      username: (( grab properties.databases.roles.ccadmin.username ))
+      password: (( grab properties.databases.roles.ccadmin.password ))
       database: ccdb
     uaadb:
-      scheme: (( databases.db_scheme ))
-      address: (( databases.address ))
-      port: (( databases.port ))
-      username: (( databases.roles.uaaadmin.username ))
-      password: (( databases.roles.uaaadmin.password ))
+      scheme: postgres
+      # scheme: (( grab terraform_outputs.engine ))
+      address: (( grab terraform_outputs.cf_rds_host ))
+      port: (( grab terraform_outputs.cf_rds_port ))
+      username: (( grab properties.databases.roles.uaaadmin.username ))
+      password: (( grab properties.databases.roles.uaaadmin.password ))
       database: uaadb
 
   ssl:
-    skip_cert_verify: (( merge || false ))
+    skip_cert_verify: false
   networks:
-    apps: (( meta.network ))
+    apps: (( grab meta.network ))
   nats:
-    user: (( merge ))
-    password: (( merge ))
-    port: (( merge ))
-    machines: (( merge ))
-    address: (( machines.[0] ))
+    user: (( param "specify nats user" ))
+    password: (( param "specify nats password" ))
+    port: (( param "specify nats port" ))
+    machines: (( param "specify nats machines" ))
+    address: (( grab machines.[0] ))
   databases:
-    db_scheme: (( merge ))
-    address: (( merge ))
-    port: (( merge ))
-    roles: (( merge ))
+    roles: (( param "specify database roles" ))
