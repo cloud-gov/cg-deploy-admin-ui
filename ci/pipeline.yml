@@ -1,11 +1,11 @@
 ---
 jobs:
 - name: deploy-admin-ui-staging
+  serial: true
   plan:
   - aggregate:
     - get: pipeline-tasks
     - get: admin-ui-config
-      resource: admin-ui-config-staging
       trigger: true
     - get: admin-ui-release
       trigger: true
@@ -71,6 +71,7 @@ jobs:
       icon_url: {{slack-icon-url}}
 
 - name: register-admin-ui-staging
+  serial: true
   plan:
   - aggregate:
     - get: pipeline-tasks
@@ -90,11 +91,12 @@ jobs:
       BOSH_CACERT: common/boshCA.crt
 
 - name: deploy-admin-ui-production
+  serial: true
   plan:
   - aggregate:
     - get: pipeline-tasks
     - get: admin-ui-config
-      resource: admin-ui-config-production
+      passed: [deploy-admin-ui-staging]
       trigger: true
     - get: admin-ui-release
       passed: [deploy-admin-ui-staging]
@@ -136,6 +138,7 @@ jobs:
       icon_url: {{slack-icon-url}}
 
 - name: register-admin-ui-production
+  serial: true
   plan:
   - aggregate:
     - get: pipeline-tasks
@@ -159,8 +162,6 @@ resources:
   type: cg-common
   source:
     bucket_name: {{admin-ui-private-bucket-staging}}
-    access_key_id: {{admin-ui-private-access-key-id-staging}}
-    secret_access_key: {{admin-ui-private-secret-access-key-staging}}
     secrets_file: admin-ui.yml
     secrets_passphrase: {{admin-ui-staging-private-passphrase}}
     bosh_cert: bosh.pem
@@ -170,8 +171,6 @@ resources:
   type: cg-common
   source:
     bucket_name: {{admin-ui-private-bucket-production}}
-    access_key_id: {{admin-ui-private-access-key-id-production}}
-    secret_access_key: {{admin-ui-private-secret-access-key-production}}
     secrets_file: admin-ui.yml
     secrets_passphrase: {{admin-ui-production-private-passphrase}}
     bosh_cert: bosh.pem
@@ -182,26 +181,18 @@ resources:
   source:
     repository: cloudfoundry-community/admin-ui-boshrelease
 
-- name: admin-ui-config-staging
+- name: admin-ui-config
   type: git
   source:
     uri: {{cg-deploy-admin-ui-git-url}}
-    branch: {{cg-deploy-admin-ui-git-branch-staging}}
-
-- name: admin-ui-config-production
-  type: git
-  source:
-    uri: {{cg-deploy-admin-ui-git-url}}
-    branch: {{cg-deploy-admin-ui-git-branch-production}}
+    branch: {{cg-deploy-admin-ui-git-branch}}
 
 - name: admin-ui-stemcell
-  type: s3
+  type: s3-iam
   source:
-    access_key_id: {{admin-ui-private-access-key-id-production}}
     bucket: {{stemcell-bucket}}
     regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
     region_name: {{aws-region}}
-    secret_access_key: {{admin-ui-private-secret-access-key-production}}
 
 - name: admin-ui-staging-deployment
   type: 18f-bosh-deployment
@@ -228,21 +219,17 @@ resources:
     branch: {{pipeline-tasks-git-branch}}
 
 - name: state-file-staging
-  type: s3
+  type: s3-iam
   source:
     bucket: {{tf-state-bucket-staging}}
     versioned_file: {{tf-state-file-staging}}
-    access_key_id: {{admin-ui-private-access-key-id-staging}}
-    secret_access_key: {{admin-ui-private-secret-access-key-staging}}
     region_name: {{aws-region}}
 
 - name: state-file-production
-  type: s3
+  type: s3-iam
   source:
     bucket: {{tf-state-bucket-production}}
     versioned_file: {{tf-state-file-production}}
-    access_key_id: {{admin-ui-private-access-key-id-production}}
-    secret_access_key: {{admin-ui-private-secret-access-key-production}}
     region_name: {{aws-region}}
 
 - name: slack
@@ -260,6 +247,11 @@ resource_types:
   type: docker-image
   source:
     repository: 18fgsa/bosh-deployment-resource
+
+- name: s3-iam
+  type: docker-image
+  source:
+    repository: 18fgsa/s3-resource
 
 - name: cg-common
   type: docker-image
