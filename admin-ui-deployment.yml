@@ -137,20 +137,18 @@ properties:
         user: ~
 
     ccdb:
-      scheme: postgres
-      # scheme: (( grab terraform_outputs.engine ))
+      scheme: (( grab terraform_outputs.engine ))
       address: (( grab terraform_outputs.cf_rds_host ))
       port: (( grab terraform_outputs.cf_rds_port ))
-      username: (( grab properties.databases.roles.ccadmin.username ))
-      password: (( grab properties.databases.roles.ccadmin.password ))
+      username: (( grab terraform_outputs.cf_rds_username ))
+      password: (( grab terraform_outputs.cf_rds_password ))
       database: ccdb
     uaadb:
-      scheme: postgres
-      # scheme: (( grab terraform_outputs.engine ))
+      scheme: (( grab terraform_outputs.engine ))
       address: (( grab terraform_outputs.cf_rds_host ))
       port: (( grab terraform_outputs.cf_rds_port ))
-      username: (( grab properties.databases.roles.uaaadmin.username ))
-      password: (( grab properties.databases.roles.uaaadmin.password ))
+      username: (( grab terraform_outputs.cf_rds_username ))
+      password: (( grab terraform_outputs.cf_rds_password ))
       database: uaadb
 
   ssl:
@@ -163,5 +161,3 @@ properties:
     port: (( param "specify nats port" ))
     machines: (( param "specify nats machines" ))
     address: (( grab machines.[0] ))
-  databases:
-    roles: (( param "specify database roles" ))
