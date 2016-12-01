@@ -11,24 +11,6 @@ director_uuid: (( param "specify director uuid" ))
 releases:
 - name: admin-ui
   version: latest
-- name: collectd
-  version: latest
-- name: fisma
-  version: latest
-- name: tripwire
-  version: latest
-- name: clamav
-  version: latest
-- name: snort
-  version: latest
-- name: riemannc
-  version: latest
-- name: awslogs
-  version: latest
-- name: nessus-agent
-  version: latest
-- name: newrelic
-  version: latest
 compilation: (( param "specify compilation" ))
 update: (( param "specify update" ))
 
@@ -56,24 +38,6 @@ jobs:
   templates:
   - name: admin_ui
     release: admin-ui
-  - name: collectd
-    release: collectd
-  - name: harden
-    release: fisma
-  - name: tripwire
-    release: tripwire
-  - name: clamav
-    release: clamav
-  - name: snort
-    release: snort
-  - name: riemannc
-    release: riemannc
-  - name: awslogs
-    release: awslogs
-  - name: nessus-agent
-    release: nessus-agent
-  - name: newrelic-monitor
-    release: newrelic
   instances: 1
   resource_pool: medium_z1
   persistent_disk_pool: admin-ui
@@ -109,17 +73,6 @@ properties:
     url: (( param "specify uaa url" ))
     admin:
       client_secret: (( param "specify uaa client secret" ))
-  tripwire: (( param "specify tripwire properties" ))
-  awslogs: (( param "specify awslogs properties" ))
-  nessus-agent: (( param "specify nessus properties" ))
-  newrelic: (( param "specify newrelic properties" ))
-  collectd:
-    riemann_server: (( param "specify riemann host" ))
-    hostname_prefix: (( param "specify collectd prefix" ))
-
-  riemann:
-    server: (( grab properties.collectd.riemann_server ))
-    port: 5555
   admin_ui:
     cloud_controller_uri: (( grab properties.cc.srv_api_uri ))
     cloud_controller_ssl_verify_none: (( grab properties.ssl.skip_cert_verify ))
