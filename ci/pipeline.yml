@@ -212,6 +212,11 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 
+- name: s3-iam
+  type: docker-image
+  source:
+    repository: 18fgsa/s3-resource
+
 - name: 18f-bosh-deployment
   type: docker-image
   source:
