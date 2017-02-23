@@ -14,14 +14,10 @@ jobs:
       trigger: true
     - get: admin-ui-stemcell
       trigger: true
-    - get: terraform-state
-      resource: state-file-staging
+    - get: terraform-yaml
+      resource: terraform-yaml-staging
       trigger: true
     - get: master-bosh-root-cert
-  - task: terraform-state-to-yaml
-    file: pipeline-tasks/terraform-state-to-yaml.yml
-    params:
-      STATE_FILE: terraform.tfstate
   - task: admin-ui-manifest
     config: &manifest-config
       platform: linux
@@ -88,14 +84,10 @@ jobs:
     - get: admin-ui-stemcell
       passed: [deploy-admin-ui-staging]
       trigger: true
-    - get: terraform-state
-      resource: state-file-production
+    - get: terraform-yaml
+      resource: terraform-yaml-production
       trigger: true
     - get: master-bosh-root-cert
-  - task: terraform-state-to-yaml
-    file: pipeline-tasks/terraform-state-to-yaml.yml
-    params:
-      STATE_FILE: terraform.tfstate
   - task: admin-ui-manifest
     config: *manifest-config
   - put: admin-ui-production-deployment
@@ -187,14 +179,14 @@ resources:
     uri: {{pipeline-tasks-git-url}}
     branch: {{pipeline-tasks-git-branch}}
 
-- name: state-file-staging
+- name: terraform-yaml-staging
   type: s3-iam
   source:
     bucket: {{tf-state-bucket-staging}}
     versioned_file: {{tf-state-file-staging}}
     region_name: {{aws-region}}
 
-- name: state-file-production
+- name: terraform-yaml-production
   type: s3-iam
   source:
     bucket: {{tf-state-bucket-production}}
@@ -221,11 +213,6 @@ resource_types:
   type: docker-image
   source:
     repository: 18fgsa/bosh-deployment-resource
-
-- name: s3-iam
-  type: docker-image
-  source:
-    repository: 18fgsa/s3-resource
 
 - name: cg-common
   type: docker-image
