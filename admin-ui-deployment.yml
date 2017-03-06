@@ -71,14 +71,14 @@ properties:
 
     ccdb:
       scheme: (( grab terraform_outputs.cf_rds_engine ))
-      address: (( grab terraform_outputs.cf_rds_96_host ))
+      address: (( grab terraform_outputs.cf_rds_host ))
       port: (( grab terraform_outputs.cf_rds_port ))
       username: (( grab terraform_outputs.cf_rds_username ))
       password: (( grab terraform_outputs.cf_rds_password ))
       database: ccdb
     uaadb:
       scheme: (( grab terraform_outputs.cf_rds_engine ))
-      address: (( grab terraform_outputs.cf_rds_96_host ))
+      address: (( grab terraform_outputs.cf_rds_host ))
       port: (( grab terraform_outputs.cf_rds_port ))
       username: (( grab terraform_outputs.cf_rds_username ))
       password: (( grab terraform_outputs.cf_rds_password ))
