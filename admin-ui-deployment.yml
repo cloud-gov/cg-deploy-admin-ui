@@ -11,7 +11,16 @@ director_uuid: (( param "specify director uuid" ))
 releases:
 - name: admin-ui
   version: latest
-compilation: (( param "specify compilation" ))
+compilation:
+  cloud_properties:
+    availability_zone: (( grab terraform_outputs.az1 ))
+    disk: 30000
+    instance_type: c3.large
+    persistent_disk: 20000
+    iam_instance_profile: (( grab terraform_outputs.bosh_compilation_profile ))
+  network: default
+  reuse_compilation_vms: true
+  workers: 5
 update: (( param "specify update" ))
 
 networks:
