@@ -11,48 +11,25 @@ director_uuid: (( param "specify director uuid" ))
 releases:
 - name: admin-ui
   version: latest
-compilation:
-  cloud_properties:
-    availability_zone: (( grab terraform_outputs.az1 ))
-    disk: 30000
-    instance_type: c3.large
-    persistent_disk: 20000
-    iam_instance_profile: (( grab terraform_outputs.bosh_compilation_profile ))
-  network: default
-  reuse_compilation_vms: true
-  workers: 5
 update: (( param "specify update" ))
 
-networks:
-- name: default
-  type: dynamic
-  cloud_properties:
-    subnet: (( grab terraform_outputs.private_subnet_az1 ))
-    security_groups:
-    - (( grab terraform_outputs.bosh_security_group ))
+stemcells:
+- alias: default
+  name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+  version: latest
 
-resource_pools:
-- name: medium_z1
-  network: (( grab meta.network ))
-  stemcell: (( param "specify stemcell" ))
-
-disk_pools:
-- name: admin-ui
-  disk_size: 5_120
-  cloud_properties:
-    encrypted: true
-
-jobs:
+instance_groups:
 - name: admin_ui
+  instances: 1
+  azs: [z1]
+  networks:
+  - name: admin-ui
+  vm_type: admin-ui
+  persistent_disk_type: admin-ui
+  stemcell: default
   templates:
   - name: admin_ui
     release: admin-ui
-  instances: 1
-  resource_pool: medium_z1
-  persistent_disk_pool: admin-ui
-  networks:
-  - name: (( grab meta.network ))
-    type: dynamic
 
 properties:
   cc:
