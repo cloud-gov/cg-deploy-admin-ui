@@ -1,11 +1,4 @@
 ---
-meta:
-  network: cf1
-  subdomain: admin
-  admin_ui_uaa_client:
-    id: admin-ui
-    secret: (( param "specify uaa client secret" ))
-
 name: admin-ui
 director_uuid: (( param "specify director uuid" ))
 releases:
@@ -19,7 +12,7 @@ stemcells:
   version: latest
 
 instance_groups:
-- name: admin_ui
+- name: admin-ui
   instances: 1
   azs: [z1]
   networks:
@@ -27,56 +20,55 @@ instance_groups:
   vm_type: admin-ui
   persistent_disk_type: admin-ui
   stemcell: default
-  templates:
+  jobs:
   - name: admin_ui
     release: admin-ui
+    properties:
+      cc:
+        srv_api_uri: (( param "specify cc api url" ))
+      system_domain: (( param "specify system domain" ))
+      uaa:
+        url: (( param "specify uaa url" ))
+        admin:
+          client_secret: (( param "specify uaa client secret" ))
+      admin_ui:
+        cloud_controller_uri: (( grab instance_groups.admin-ui.jobs.admin_ui.properties.cc.srv_api_uri ))
+        cloud_controller_ssl_verify_none: (( grab instance_groups.admin-ui.jobs.admin_ui.properties.ssl.skip_cert_verify ))
+        uri: (( concat "admin." instance_groups.admin-ui.jobs.admin_ui.properties.system_domain ))
+        users: ~
+        admins: (( param "specify admins" ))
+        uaa:
+          url: (( grab instance_groups.admin-ui.jobs.admin_ui.properties.uaa.url ))
+          admin_client_secret: (( grab instance_groups.admin-ui.jobs.admin_ui.properties.uaa.admin.client_secret ))
+          client:
+            id: admin-ui
+            secret: (( param "specify uaa client secret" ))
+          scopes:
+            admin: ~
+            user: ~
 
-properties:
-  cc:
-    srv_api_uri: (( param "specify cc api url" ))
-  system_domain: (( param "specify system domain" ))
-  uaa:
-    url: (( param "specify uaa url" ))
-    admin:
-      client_secret: (( param "specify uaa client secret" ))
-  admin_ui:
-    cloud_controller_uri: (( grab properties.cc.srv_api_uri ))
-    cloud_controller_ssl_verify_none: (( grab properties.ssl.skip_cert_verify ))
-    uri: (( concat meta.subdomain "." properties.system_domain ))
-    users: ~
-    admins: (( param "specify admins" ))
-    uaa:
-      url: (( grab properties.uaa.url ))
-      admin_client_secret: (( grab properties.uaa.admin.client_secret ))
-      client:
-        id: (( grab meta.admin_ui_uaa_client.id ))
-        secret: (( grab meta.admin_ui_uaa_client.secret ))
-      scopes:
-        admin: ~
-        user: ~
+        ccdb:
+          scheme: (( grab terraform_outputs.cf_rds_engine ))
+          address: (( grab terraform_outputs.cf_rds_host ))
+          port: (( grab terraform_outputs.cf_rds_port ))
+          username: (( grab terraform_outputs.cf_rds_username ))
+          password: (( grab terraform_outputs.cf_rds_password ))
+          database: ccdb
+        uaadb:
+          scheme: (( grab terraform_outputs.cf_rds_engine ))
+          address: (( grab terraform_outputs.cf_rds_host ))
+          port: (( grab terraform_outputs.cf_rds_port ))
+          username: (( grab terraform_outputs.cf_rds_username ))
+          password: (( grab terraform_outputs.cf_rds_password ))
+          database: uaadb
 
-    ccdb:
-      scheme: (( grab terraform_outputs.cf_rds_engine ))
-      address: (( grab terraform_outputs.cf_rds_host ))
-      port: (( grab terraform_outputs.cf_rds_port ))
-      username: (( grab terraform_outputs.cf_rds_username ))
-      password: (( grab terraform_outputs.cf_rds_password ))
-      database: ccdb
-    uaadb:
-      scheme: (( grab terraform_outputs.cf_rds_engine ))
-      address: (( grab terraform_outputs.cf_rds_host ))
-      port: (( grab terraform_outputs.cf_rds_port ))
-      username: (( grab terraform_outputs.cf_rds_username ))
-      password: (( grab terraform_outputs.cf_rds_password ))
-      database: uaadb
-
-  ssl:
-    skip_cert_verify: false
-  networks:
-    apps: (( grab meta.network ))
-  nats:
-    user: (( param "specify nats user" ))
-    password: (( param "specify nats password" ))
-    port: (( param "specify nats port" ))
-    machines: (( param "specify nats machines" ))
-    address: (( grab machines.[0] ))
+      ssl:
+        skip_cert_verify: false
+      networks:
+        apps: (( param "specify apps network" ))
+      nats:
+        user: (( param "specify nats user" ))
+        password: (( param "specify nats password" ))
+        port: (( param "specify nats port" ))
+        machines: (( param "specify nats machines" ))
+        address: (( grab machines.[0] ))
