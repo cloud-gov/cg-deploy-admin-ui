@@ -63,8 +63,9 @@ jobs:
         - -exc
         - |
           admin-ui-config/generate-manifest.sh \
+            admin-ui-config/admin-ui-staging.yml \
             terraform-yaml/state.yml \
-            common/decrypted-admin-ui.environment.yml
+            common/decrypted-admin-ui.external.yml
             common/decrypted-admin-ui.main.yml \
             > admin-manifest/manifest.yml
   - put: admin-ui-staging-deployment
@@ -116,7 +117,19 @@ jobs:
       trigger: true
     - get: master-bosh-root-cert
   - task: admin-ui-manifest
-    config: *manifest-config
+    config:
+      <<: *manifest-config
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          admin-ui-config/generate-manifest.sh \
+            admin-ui-config/admin-ui-production.yml \
+            terraform-yaml/state.yml \
+            common/decrypted-admin-ui.external.yml
+            common/decrypted-admin-ui.main.yml \
+            > admin-manifest/manifest.yml
   - put: admin-ui-production-deployment
     params: *deploy-params
   on_failure:
