@@ -1,0 +1,13 @@
+---
+director_uuid: dee45f8d-3b79-49f6-90e9-956ab91fc4cc
+
+instance_groups:
+- name: admin-ui
+  jobs:
+  - name: admin_ui
+    properties:
+      admin_ui:
+        cloud_controller_uri: https://api.fr-stage.cloud.gov
+        uri: admin.fr-stage.cloud.gov
+      networks:
+        apps: default

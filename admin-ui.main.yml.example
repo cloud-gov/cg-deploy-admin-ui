@@ -1,0 +1,10 @@
+---
+instance_groups:
+- name: admin-ui
+  jobs:
+  - name: admin_ui
+    properties:
+      admin_ui:
+        uaa:
+          client:
+            secret: SECRET

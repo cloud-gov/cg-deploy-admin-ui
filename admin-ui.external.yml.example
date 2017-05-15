@@ -1,0 +1,14 @@
+---
+instance_groups:
+- name: admin-ui
+  jobs:
+  - name: admin_ui
+    properties:
+      nats:
+        user: nats
+        password: nats
+        address: NATS_IP
+        machines:
+        - NAT_1
+        - NAT-2
+        port: 4222
