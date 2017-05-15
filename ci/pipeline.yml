@@ -36,7 +36,7 @@ jobs:
     - get: admin-ui-release
       trigger: true
     - get: common
-      resource: common-stage
+      resource: common-staging
       trigger: true
     - get: admin-ui-stemcell
       trigger: true
@@ -64,7 +64,8 @@ jobs:
         - |
           admin-ui-config/generate-manifest.sh \
             terraform-yaml/state.yml \
-            common/secrets.yml \
+            common/decrypted-admin-ui.environment.yml
+            common/decrypted-admin-ui.main.yml \
             > admin-manifest/manifest.yml
   - put: admin-ui-staging-deployment
     params: &deploy-params
@@ -105,7 +106,7 @@ jobs:
       passed: [deploy-admin-ui-staging]
       trigger: true
     - get: common
-      resource: common-prod
+      resource: common-production
       trigger: true
     - get: admin-ui-stemcell
       passed: [deploy-admin-ui-staging]
@@ -145,20 +146,24 @@ resources:
     region_name: {{aws-region}}
     versioned_file: master-bosh.crt
 
-- name: common-stage
+- name: common-staging
   type: cg-common
   source:
     bucket_name: {{admin-ui-private-bucket-staging}}
-    secrets_file: admin-ui.yml
+    secrets_files:
+    - admin-ui.main.yml
+    - admin-ui.environment.yml
     secrets_passphrase: {{admin-ui-staging-private-passphrase}}
     bosh_cert: bosh.pem
     region: {{aws-region}}
 
-- name: common-prod
+- name: common-production
   type: cg-common
   source:
     bucket_name: {{admin-ui-private-bucket-production}}
-    secrets_file: admin-ui.yml
+    secrets_files:
+    - admin-ui.main.yml
+    - admin-ui.environment.yml
     secrets_passphrase: {{admin-ui-production-private-passphrase}}
     bosh_cert: bosh.pem
     region: {{aws-region}}

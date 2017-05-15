@@ -1,0 +1,28 @@
+---
+director_uuid: DIRECTOR_ID
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 5000-600000
+
+instance_groups:
+- name: admin-ui
+  jobs:
+  - name: admin_ui
+    properties:
+      admin_ui:
+        cloud_controller_uri: https://api.example.org
+        uri: admin.example.org
+      networks:
+        apps: cf1
+      nats:
+        user: nats
+        password: nats
+        address: NATS_IP
+        machines:
+        - NAT_1
+        - NAT-2
+        port: 4222
