@@ -1,31 +1,5 @@
 ---
 jobs:
-- name: build-admin-ui-release
-  plan:
-  - aggregate:
-    - get: release-git-repo
-      resource: admin-ui-release-git-repo
-      trigger: true
-    - get: pipeline-tasks
-    - get: final-builds-dir-tarball
-      resource: admin-ui-final-builds-dir-tarball
-    - get: releases-dir-tarball
-      resource: admin-ui-releases-dir-tarball
-  - task: finalize-release
-    file: pipeline-tasks/finalize-bosh-release.yml
-    params:
-      PRIVATE_YML_CONTENT: {{admin-ui-private-yml}}
-  - aggregate:
-    - put: admin-ui-release
-      params:
-        file: finalized-release/admin-ui-*.tgz
-    - put: admin-ui-final-builds-dir-tarball
-      params:
-        file: finalized-release/final-builds-dir-admin-ui.tgz
-    - put: admin-ui-releases-dir-tarball
-      params:
-        file: finalized-release/releases-dir-admin-ui.tgz
-
 - name: deploy-admin-ui-staging
   serial: true
   plan:
@@ -181,45 +155,12 @@ resources:
     bosh_cert: bosh.pem
     region: {{aws-region}}
 
-# - name: admin-ui-release
-#   type: bosh-io-release
-#   source:
-#     repository: cloudfoundry-community/admin-ui-boshrelease
-- name: admin-ui-release-git-repo
-  type: git
-  source:
-    uri: {{admin-ui-release-git-url}}
-    branch: {{admin-ui-release-git-branch}}
-
 - name: admin-ui-release
-  type: s3
+  type: s3-iam
   source:
     bucket: {{s3-bosh-releases-bucket}}
     regexp: admin-ui-(.*).tgz
     region_name: {{aws-region}}
-    access_key_id: {{s3-bosh-releases-access-key-id}}
-    secret_access_key: {{s3-bosh-releases-secret-access-key}}
-    server_side_encryption: AES256
-
-- name: admin-ui-final-builds-dir-tarball
-  type: s3
-  source:
-    bucket: {{s3-bosh-releases-bucket}}
-    versioned_file: final-builds-dir-admin-ui.tgz
-    region_name: {{aws-region}}
-    access_key_id: {{s3-bosh-releases-access-key-id}}
-    secret_access_key: {{s3-bosh-releases-secret-access-key}}
-    server_side_encryption: AES256
-
-- name: admin-ui-releases-dir-tarball
-  type: s3
-  source:
-    bucket: {{s3-bosh-releases-bucket}}
-    versioned_file: releases-dir-admin-ui.tgz
-    region_name: {{aws-region}}
-    access_key_id: {{s3-bosh-releases-access-key-id}}
-    secret_access_key: {{s3-bosh-releases-secret-access-key}}
-    server_side_encryption: AES256
 
 - name: admin-ui-config
   type: git
