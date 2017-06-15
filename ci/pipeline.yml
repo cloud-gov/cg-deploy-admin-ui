@@ -109,6 +109,11 @@ jobs:
             common/decrypted-admin-ui.external.yml \
             common/decrypted-admin-ui.main.yml \
             > admin-manifest/manifest.yml
+  - task: lint-manifest
+    file: pipeline-tasks/lint-manifest.yml
+    input_mapping:
+      pipeline-config: admin-ui-config
+      lint-manifest: admin-manifest
   - put: admin-ui-production-deployment
     params: *deploy-params
   on_failure:
