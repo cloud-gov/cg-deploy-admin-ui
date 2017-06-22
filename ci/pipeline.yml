@@ -9,13 +9,12 @@ jobs:
       trigger: true
     - get: admin-ui-release
       trigger: true
-    - get: common
-      resource: common-staging
-      trigger: true
     - get: admin-ui-stemcell
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-staging
+      trigger: true
+    - get: cloudfoundry-state-staging
       trigger: true
     - get: master-bosh-root-cert
   - task: admin-ui-manifest
@@ -28,7 +27,7 @@ jobs:
       inputs:
       - name: admin-ui-config
       - name: terraform-yaml
-      - name: common
+      - name: cloudfoundry-state-staging
       outputs:
       - name: admin-manifest
       run:
@@ -39,8 +38,7 @@ jobs:
           admin-ui-config/generate-manifest.sh \
             admin-ui-config/admin-ui-staging.yml \
             terraform-yaml/state.yml \
-            common/decrypted-admin-ui.external.yml \
-            common/decrypted-admin-ui.main.yml \
+            cloudfoundry-state-staging/state.yml \
             > admin-manifest/manifest.yml
   - task: lint-manifest
     file: pipeline-tasks/lint-manifest.yml
@@ -143,17 +141,6 @@ resources:
     region_name: {{aws-region}}
     versioned_file: master-bosh.crt
 
-- name: common-staging
-  type: cg-common
-  source:
-    bucket_name: {{admin-ui-private-bucket-staging}}
-    secrets_files:
-    - admin-ui.main.yml
-    - admin-ui.external.yml
-    secrets_passphrase: {{admin-ui-staging-private-passphrase}}
-    bosh_cert: bosh.pem
-    region: {{aws-region}}
-
 - name: common-production
   type: cg-common
   source:
@@ -208,6 +195,13 @@ resources:
   source:
     uri: {{pipeline-tasks-git-url}}
     branch: {{pipeline-tasks-git-branch}}
+
+- name: cloudfoundry-state-staging
+  type: s3-iam
+  source:
+    bucket: {{tf-state-bucket-staging}}
+    region_name: {{aws-region}}
+    versioned_file: cloudfoundry/staging/state.yml
 
 - name: terraform-yaml-staging
   type: s3-iam

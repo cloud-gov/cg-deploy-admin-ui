@@ -10,6 +10,6 @@ which spruce > /dev/null 2>&1 || {
 dir="$(dirname $0)"
 
 spruce merge \
-  --prune meta --prune terraform_outputs \
+  --prune meta --prune terraform_outputs --prune cloudfoundry_outputs \
   "$dir/admin-ui-deployment.yml" \
   "$@"
