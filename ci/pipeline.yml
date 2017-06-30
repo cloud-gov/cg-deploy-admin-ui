@@ -179,11 +179,9 @@ resources:
     branch: {{cg-deploy-admin-ui-git-branch}}
 
 - name: admin-ui-stemcell
-  type: s3-iam
+  type: bosh-io-stemcell
   source:
-    bucket: {{stemcell-bucket}}
-    regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
-    region_name: {{aws-region}}
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 - name: admin-ui-staging-deployment
   type: 18f-bosh-deployment
