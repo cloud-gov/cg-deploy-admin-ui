@@ -16,7 +16,6 @@ jobs:
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-staging
-      trigger: true
     - get: master-bosh-root-cert
   - task: admin-ui-manifest
     config: &manifest-config
@@ -93,7 +92,6 @@ jobs:
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-production
-      trigger: true
     - get: master-bosh-root-cert
   - task: admin-ui-manifest
     config:
