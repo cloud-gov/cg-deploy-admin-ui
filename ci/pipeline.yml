@@ -122,7 +122,7 @@ resources:
     client: {{admin-ui-production-deployment-bosh-client}}
     client_secret: {{admin-ui-production-deployment-bosh-client-secret}}
     deployment: {{admin-ui-production-deployment-bosh-deployment}}
-    ca_cert: {{admin-ui-staging-deployment-ca-cert}}
+    ca_cert: {{admin-ui-production-deployment-ca-cert}}
 
 - name: pipeline-tasks
   type: git
