@@ -1,8 +1,6 @@
 ---
 name: admin-ui
 
-director_uuid: (( param "specify director uuid" ))
-
 releases:
 - name: admin-ui
   version: latest
