@@ -1,6 +1,4 @@
 ---
-director_uuid: 32ce257a-6086-45ce-9c1f-48fdfc509fe1
-
 instance_groups:
 - name: admin-ui
   jobs:
