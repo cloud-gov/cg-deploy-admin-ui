@@ -1,0 +1,66 @@
+---
+name: admin-ui
+
+releases:
+- name: admin-ui
+  version: latest
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 5000-600000
+
+stemcells:
+- alias: default
+  name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+  version: latest
+
+instance_groups:
+- name: admin-ui
+  instances: 1
+  azs: [z1]
+  networks:
+  - name: default
+  vm_type: admin-ui
+  persistent_disk_type: admin-ui
+  stemcell: default
+  jobs:
+  - name: admin_ui
+    release: admin-ui
+    properties:
+      admin_ui:
+        cloud_controller_uri: ((admin_cloud_controller_uri))
+        cloud_controller_ssl_verify_none: false
+        cookie_secret: ((admin_ui_cookie_secret))
+        uri: ((admin_uri))
+        uaa:
+          client:
+            id: admin-ui
+            secret: ((admin_ui_uaa_client_secret))
+          scopes:
+            admin: ~
+            user: ~
+        ccdb:
+          scheme: ((terraform_outputs.cf_rds_engine))
+          address: ((terraform_outputs.cf_rds_host))
+          port: ((terraform_outputs.cf_rds_port))
+          username: ((terraform_outputs.cf_rds_username))
+          password: ((terraform_outputs.cf_rds_password))
+          database: ccdb
+        uaadb:
+          scheme: ((terraform_outputs.cf_rds_engine))
+          address: ((terraform_outputs.cf_rds_host))
+          port: ((terraform_outputs.cf_rds_port))
+          username: ((terraform_outputs.cf_rds_username))
+          password: ((terraform_outputs.cf_rds_password))
+          database: uaadb
+      networks:
+        apps: default
+      nats:
+        user: ((admin_ui_nats_user))
+        password: ((admin_ui_nats_password))
+        port: ((admin_ui_nats_port))
+        machines: ((admin_ui_nats_machines))
+        address: ((admin_ui_nats_address))

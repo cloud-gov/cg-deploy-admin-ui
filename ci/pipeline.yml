@@ -9,45 +9,19 @@ jobs:
       trigger: true
     - get: admin-ui-release
       trigger: true
-    - get: common
-      resource: common-staging
+    - get: common-staging
       trigger: true
     - get: admin-ui-stemcell
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-staging
-  - task: admin-ui-manifest
-    config: &manifest-config
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: 18fgsa/concourse-task
-      inputs:
-      - name: admin-ui-config
-      - name: terraform-yaml
-      - name: common
-      outputs:
-      - name: admin-manifest
-      run:
-        path: sh
-        args:
-        - -exc
-        - |
-          admin-ui-config/generate-manifest.sh \
-            admin-ui-config/admin-ui-staging.yml \
-            terraform-yaml/state.yml \
-            common/decrypted-admin-ui.external.yml \
-            common/decrypted-admin-ui.main.yml \
-            > admin-manifest/manifest.yml
-  - task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: admin-ui-config
-      lint-manifest: admin-manifest
   - put: admin-ui-staging-deployment
     params: &deploy-params
-      manifest: admin-manifest/manifest.yml
+      manifest: admin-ui-config/bosh/manifest.yml
+      vars_files:
+        terraform-yaml/state.yml
+        admin-ui-config/bosh/varsfiles/staging.yml
+        common-staging/staging-admin-ui-decrypted.yml
       releases:
       - admin-ui-release/*.tgz
       stemcells:
@@ -82,35 +56,18 @@ jobs:
     - get: admin-ui-release
       passed: [deploy-admin-ui-staging]
       trigger: true
-    - get: common
-      resource: common-production
+    - get: common-production
       trigger: true
     - get: admin-ui-stemcell
       passed: [deploy-admin-ui-staging]
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-production
-  - task: admin-ui-manifest
-    config:
-      <<: *manifest-config
-      run:
-        path: sh
-        args:
-        - -exc
-        - |
-          admin-ui-config/generate-manifest.sh \
-            admin-ui-config/admin-ui-production.yml \
-            terraform-yaml/state.yml \
-            common/decrypted-admin-ui.external.yml \
-            common/decrypted-admin-ui.main.yml \
-            > admin-manifest/manifest.yml
-  - task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: admin-ui-config
-      lint-manifest: admin-manifest
   - put: admin-ui-production-deployment
     params: *deploy-params
+      vars_files:
+        admin-ui-config/bosh/varsfiles/production.yml
+        common-production/production-admin-ui-decrypted.yml
   on_failure:
     put: slack
     params:
@@ -132,26 +89,18 @@ jobs:
 
 resources:
 - name: common-staging
-  type: cg-common
+  type: s3-iam
   source:
-    bucket_name: {{admin-ui-private-bucket-staging}}
-    secrets_files:
-    - admin-ui.main.yml
-    - admin-ui.external.yml
-    secrets_passphrase: {{admin-ui-staging-private-passphrase}}
-    bosh_cert: bosh.pem
-    region: {{aws-region}}
+    bucket: {{admin-ui-private-bucket-staging}}
+    versioned_file: staging-admin-ui-decrypted.yml
+    region_name: {{aws-region}}
 
 - name: common-production
-  type: cg-common
+  type: s3-iam
   source:
-    bucket_name: {{admin-ui-private-bucket-production}}
-    secrets_files:
-    - admin-ui.main.yml
-    - admin-ui.external.yml
-    secrets_passphrase: {{admin-ui-production-private-passphrase}}
-    bosh_cert: bosh.pem
-    region: {{aws-region}}
+    bucket: {{admin-ui-private-bucket-production}}
+    versioned_file: production-admin-ui-decrypted.yml
+    region_name: {{aws-region}}
 
 - name: admin-ui-release
   type: s3-iam
@@ -230,7 +179,8 @@ resource_types:
   source:
     repository: cloudfoundry/bosh-deployment-resource
 
-- name: cg-common
-  type: docker-image
-  source:
-    repository: 18fgsa/cg-common-resource
+variables:
+- name: admin_ui_cookie_secret
+  type: password
+- name: admin_ui_uaa_client_secret
+  type: password
