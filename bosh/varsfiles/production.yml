@@ -1,2 +1,2 @@
-admin_cloud_controller_uri: https://api.fr.cloud.gov
+cloud_controller_uri: https://api.fr.cloud.gov
 admin_uri: admin.fr.cloud.gov

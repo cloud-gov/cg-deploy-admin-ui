@@ -1,2 +1,2 @@
-admin_cloud_controller_uri: https://api.fr-stage.cloud.gov
+cloud_controller_uri: https://api.fr-stage.cloud.gov
 admin_uri: admin.fr-stage.cloud.gov

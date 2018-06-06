@@ -31,7 +31,7 @@ instance_groups:
     release: admin-ui
     properties:
       admin_ui:
-        cloud_controller_uri: ((admin_cloud_controller_uri))
+        cloud_controller_uri: ((cloud_controller_uri))
         cloud_controller_ssl_verify_none: false
         cookie_secret: ((admin_ui_cookie_secret))
         uri: ((admin_uri))
