@@ -16,12 +16,12 @@ jobs:
     - get: terraform-yaml
       resource: terraform-yaml-staging
   - put: admin-ui-staging-deployment
-    params: &deploy-params
+    params:
       manifest: admin-ui-config/bosh/manifest.yml
       vars_files:
-        terraform-yaml/state.yml
-        admin-ui-config/bosh/varsfiles/staging.yml
-        common-staging/staging-admin-ui-decrypted.yml
+      - terraform-yaml/state.yml
+      - admin-ui-config/bosh/varsfiles/staging.yml
+      - common-staging/staging-admin-ui-decrypted.yml
       releases:
       - admin-ui-release/*.tgz
       stemcells:
@@ -64,10 +64,16 @@ jobs:
     - get: terraform-yaml
       resource: terraform-yaml-production
   - put: admin-ui-production-deployment
-    params: *deploy-params
+    params:
+      manifest: admin-ui-config/bosh/manifest.yml
       vars_files:
-        admin-ui-config/bosh/varsfiles/production.yml
-        common-production/production-admin-ui-decrypted.yml
+      - terraform-yaml/state.yml
+      - admin-ui-config/bosh/varsfiles/production.yml
+      - common-production/production-admin-ui-decrypted.yml
+      releases:
+      - admin-ui-release/*.tgz
+      stemcells:
+      - admin-ui-stemcell/*.tgz
   on_failure:
     put: slack
     params:
