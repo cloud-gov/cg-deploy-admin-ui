@@ -64,3 +64,10 @@ instance_groups:
         port: ((admin_ui_nats_port))
         machines: ((admin_ui_nats_machines))
         address: ((admin_ui_nats_address))
+
+
+variables:
+- name: admin_ui_cookie_secret
+  type: password
+- name: admin_ui_uaa_client_secret
+  type: password

@@ -184,9 +184,3 @@ resource_types:
   type: docker-image
   source:
     repository: cloudfoundry/bosh-deployment-resource
-
-variables:
-- name: admin_ui_cookie_secret
-  type: password
-- name: admin_ui_uaa_client_secret
-  type: password
