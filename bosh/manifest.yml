@@ -24,6 +24,7 @@ instance_groups:
   networks:
   - name: default
   vm_type: admin-ui
+  vm_extensions: [admin-lb]
   persistent_disk_type: admin-ui
   stemcell: default
   jobs:
