@@ -24,6 +24,7 @@ instance_groups:
   networks:
   - name: default
   vm_type: admin-ui
+  vm_extensions: [admin-lb]
   persistent_disk_type: admin-ui
   stemcell: default
   jobs:
@@ -34,7 +35,6 @@ instance_groups:
         cloud_controller_uri: ((cloud_controller_uri))
         cloud_controller_ssl_verify_none: false
         cookie_secret: ((admin_ui_cookie_secret))
-        uri: ((admin_uri))
         uaa:
           client:
             id: admin-ui
