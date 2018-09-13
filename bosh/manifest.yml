@@ -4,6 +4,8 @@ name: admin-ui
 releases:
 - name: admin-ui
   version: latest
+- name: secureproxy
+  version: latest
 
 update:
   canaries: 1
@@ -28,6 +30,12 @@ instance_groups:
   persistent_disk_type: admin-ui
   stemcell: default
   jobs:
+  - name: secureproxy
+    release: secureproxy
+    properties:
+      secureproxy:
+        listen_port: 8080
+        proxy_port: 8070
   - name: admin_ui
     release: admin-ui
     properties:
