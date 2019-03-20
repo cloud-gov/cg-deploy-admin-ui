@@ -11,7 +11,7 @@ jobs:
       trigger: true
     - get: common-staging
       trigger: true
-    - get: admin-ui-stemcell
+    - get: admin-ui-stemcell-xenial
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-staging
@@ -25,7 +25,7 @@ jobs:
       releases:
       - admin-ui-release/*.tgz
       stemcells:
-      - admin-ui-stemcell/*.tgz
+      - admin-ui-stemcell-xenial/*.tgz
   on_failure:
     put: slack
     params:
@@ -58,7 +58,7 @@ jobs:
       trigger: true
     - get: common-production
       trigger: true
-    - get: admin-ui-stemcell
+    - get: admin-ui-stemcell-xenial
       passed: [deploy-admin-ui-staging]
       trigger: true
     - get: terraform-yaml
@@ -73,7 +73,7 @@ jobs:
       releases:
       - admin-ui-release/*.tgz
       stemcells:
-      - admin-ui-stemcell/*.tgz
+      - admin-ui-stemcell-xenial/*.tgz
   on_failure:
     put: slack
     params:
@@ -121,10 +121,10 @@ resources:
     uri: {{cg-deploy-admin-ui-git-url}}
     branch: {{cg-deploy-admin-ui-git-branch}}
 
-- name: admin-ui-stemcell
+- name: admin-ui-stemcell-xenial
   type: bosh-io-stemcell
   source:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    name: bosh-aws-xen-hvm-ubuntu-xenial-go_agent
 
 - name: admin-ui-staging-deployment
   type: bosh-deployment
