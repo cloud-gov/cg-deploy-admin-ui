@@ -13,6 +13,7 @@ update:
   max_in_flight: 1
   serial: true
   update_watch_time: 5000-600000
+  vm_strategy: create-swap-delete
 
 stemcells:
 - alias: default
