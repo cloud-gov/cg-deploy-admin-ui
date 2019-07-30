@@ -3,7 +3,7 @@ jobs:
 - name: deploy-admin-ui-staging
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: admin-ui-config
       trigger: true
@@ -48,7 +48,7 @@ jobs:
 - name: deploy-admin-ui-production
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: admin-ui-config
       passed: [deploy-admin-ui-staging]
