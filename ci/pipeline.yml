@@ -9,8 +9,6 @@ jobs:
       trigger: true
     - get: admin-ui-release
       trigger: true
-    - get: common-staging
-      trigger: true
     - get: admin-ui-stemcell-xenial
       trigger: true
     - get: terraform-yaml
@@ -21,7 +19,6 @@ jobs:
       vars_files:
       - terraform-yaml/state.yml
       - admin-ui-config/bosh/varsfiles/staging.yml
-      - common-staging/staging-admin-ui.yml
       releases:
       - admin-ui-release/*.tgz
       stemcells:
@@ -56,8 +53,6 @@ jobs:
     - get: admin-ui-release
       passed: [deploy-admin-ui-staging]
       trigger: true
-    - get: common-production
-      trigger: true
     - get: admin-ui-stemcell-xenial
       passed: [deploy-admin-ui-staging]
       trigger: true
@@ -69,7 +64,6 @@ jobs:
       vars_files:
       - terraform-yaml/state.yml
       - admin-ui-config/bosh/varsfiles/production.yml
-      - common-production/production-admin-ui.yml
       releases:
       - admin-ui-release/*.tgz
       stemcells:
@@ -94,20 +88,6 @@ jobs:
       icon_url: {{slack-icon-url}}
 
 resources:
-- name: common-staging
-  type: s3-iam
-  source:
-    bucket: {{admin-ui-private-bucket}}
-    versioned_file: staging-admin-ui.yml
-    region_name: {{aws-region}}
-
-- name: common-production
-  type: s3-iam
-  source:
-    bucket: {{admin-ui-private-bucket}}
-    versioned_file: production-admin-ui.yml
-    region_name: {{aws-region}}
-
 - name: admin-ui-release
   type: s3-iam
   source:
