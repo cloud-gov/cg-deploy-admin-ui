@@ -26,9 +26,9 @@ instance_groups:
   azs: [z1]
   networks:
   - name: default
-  vm_type: admin-ui
+  vm_type: t2.medium
   vm_extensions: [admin-lb]
-  persistent_disk_type: admin-ui
+  persistent_disk_type: 5GB
   stemcell: default
   jobs:
   - name: secureproxy
