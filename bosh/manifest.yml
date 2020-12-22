@@ -28,7 +28,7 @@ instance_groups:
   - name: default
   vm_type: t3.medium
   vm_extensions: [admin-lb]
-  persistent_disk_type: 5GB
+  persistent_disk_type: 10GB
   stemcell: default
   jobs:
   - name: secureproxy
