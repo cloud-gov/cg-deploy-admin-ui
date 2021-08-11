@@ -13,6 +13,8 @@ jobs:
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-staging
+    - get: cg-s3-secureproxy-release
+      trigger: true
   - put: admin-ui-staging-deployment
     params:
       manifest: admin-ui-config/bosh/manifest.yml
@@ -21,6 +23,7 @@ jobs:
       - admin-ui-config/bosh/varsfiles/staging.yml
       releases:
       - admin-ui-release/*.tgz
+      - cg-s3-secureproxy-release/*.tgz
       stemcells:
       - admin-ui-stemcell-bionic/*.tgz
   on_failure:
@@ -58,6 +61,10 @@ jobs:
       trigger: true
     - get: terraform-yaml
       resource: terraform-yaml-production
+    - get: cg-s3-secureproxy-release
+      trigger: true
+      passed:
+      - deploy-admin-ui-staging
   - put: admin-ui-production-deployment
     params:
       manifest: admin-ui-config/bosh/manifest.yml
@@ -66,6 +73,7 @@ jobs:
       - admin-ui-config/bosh/varsfiles/production.yml
       releases:
       - admin-ui-release/*.tgz
+      - cg-s3-secureproxy-release/*.tgz
       stemcells:
       - admin-ui-stemcell-bionic/*.tgz
   on_failure:
@@ -148,6 +156,14 @@ resources:
   type: slack-notification
   source:
     url: {{slack-webhook-url}}
+
+- name: cg-s3-secureproxy-release
+  source:
+    bucket: cloud-gov-bosh-releases
+    private: true
+    regexp: secureproxy-(.*).tgz
+    region_name: us-gov-west-1
+  type: s3-iam
 
 resource_types:
 - name: slack-notification
