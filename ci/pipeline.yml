@@ -108,6 +108,7 @@ resources:
   source:
     uri: {{cg-deploy-admin-ui-git-url}}
     branch: {{cg-deploy-admin-ui-git-branch}}
+    commit_verification_keys: ((cloud-gov-pgp-keys))
 
 - name: admin-ui-stemcell-bionic
   type: bosh-io-stemcell
@@ -137,6 +138,7 @@ resources:
   source:
     uri: {{pipeline-tasks-git-url}}
     branch: {{pipeline-tasks-git-branch}}
+    commit_verification_keys: ((cloud-gov-pgp-keys))
 
 - name: terraform-yaml-staging
   type: s3-iam
