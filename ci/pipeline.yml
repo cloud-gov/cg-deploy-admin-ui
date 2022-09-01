@@ -1,5 +1,14 @@
 ---
 jobs:
+- name: set-self
+  plan:
+    - get: admin-ui-config
+      trigger: true
+    - set_pipeline: self
+      file: admin-ui-config/ci/pipeline.yml
+      var_files:
+        - admin-ui-config/ci/config.yml
+
 - name: deploy-admin-ui-staging
   serial: true
   plan:
@@ -7,6 +16,7 @@ jobs:
     - get: pipeline-tasks
     - get: admin-ui-config
       trigger: true
+      passed: [set-self]
     - get: admin-ui-release
       trigger: true
     - get: admin-ui-stemcell-bionic
