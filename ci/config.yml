@@ -1,4 +1,4 @@
-cg-deploy-admin-ui-git-branch: master
+cg-deploy-admin-ui-git-branch: test-deploy-jammy
 cg-deploy-admin-ui-git-url: https://github.com/18F/cg-deploy-admin-ui.git
 pipeline-tasks-git-branch: master
 pipeline-tasks-git-url: https://github.com/18F/cg-pipeline-tasks.git
