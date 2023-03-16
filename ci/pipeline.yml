@@ -42,18 +42,18 @@ jobs:
       text: |
         :x: FAILED to deploy admin-ui on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed admin-ui on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-admin-ui-production
   serial: true
@@ -92,32 +92,32 @@ jobs:
       text: |
         :x: FAILED to deploy admin-ui on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed admin-ui on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 resources:
 - name: admin-ui-release
   type: s3-iam
   source:
-    bucket: {{s3-bosh-releases-bucket}}
+    bucket: ((s3-bosh-releases-bucket))
     regexp: admin-ui-(.*).tgz
-    region_name: {{aws-region}}
+    region_name: ((aws-region))
 
 - name: admin-ui-config
   type: git
   source:
-    uri: {{cg-deploy-admin-ui-git-url}}
-    branch: {{cg-deploy-admin-ui-git-branch}}
+    uri: ((cg-deploy-admin-ui-git-url))
+    branch: ((cg-deploy-admin-ui-git-branch))
     commit_verification_keys: ((cloud-gov-pgp-keys))
 
 - name: admin-ui-stemcell-jammy
@@ -128,46 +128,46 @@ resources:
 - name: admin-ui-staging-deployment
   type: bosh-deployment
   source:
-    target: {{admin-ui-staging-deployment-bosh-target}}
-    client: {{admin-ui-staging-deployment-bosh-client}}
-    client_secret: {{admin-ui-staging-deployment-bosh-client-secret}}
-    deployment: {{admin-ui-staging-deployment-bosh-deployment}}
-    ca_cert: {{admin-ui-staging-deployment-ca-cert}}
+    target: ((admin-ui-staging-deployment-bosh-target))
+    client: ((admin-ui-staging-deployment-bosh-client))
+    client_secret: ((admin-ui-staging-deployment-bosh-client-secret))
+    deployment: ((admin-ui-staging-deployment-bosh-deployment))
+    ca_cert: ((admin-ui-staging-deployment-ca-cert))
 
 - name: admin-ui-production-deployment
   type: bosh-deployment
   source:
-    target: {{admin-ui-production-deployment-bosh-target}}
-    client: {{admin-ui-production-deployment-bosh-client}}
-    client_secret: {{admin-ui-production-deployment-bosh-client-secret}}
-    deployment: {{admin-ui-production-deployment-bosh-deployment}}
-    ca_cert: {{admin-ui-production-deployment-ca-cert}}
+    target: ((admin-ui-production-deployment-bosh-target))
+    client: ((admin-ui-production-deployment-bosh-client))
+    client_secret: ((admin-ui-production-deployment-bosh-client-secret))
+    deployment: ((admin-ui-production-deployment-bosh-deployment))
+    ca_cert: ((admin-ui-production-deployment-ca-cert))
 
 - name: pipeline-tasks
   type: git
   source:
-    uri: {{pipeline-tasks-git-url}}
-    branch: {{pipeline-tasks-git-branch}}
+    uri: ((pipeline-tasks-git-url))
+    branch: ((pipeline-tasks-git-branch))
     commit_verification_keys: ((cloud-gov-pgp-keys))
 
 - name: terraform-yaml-staging
   type: s3-iam
   source:
-    bucket: {{tf-state-bucket-staging}}
-    versioned_file: {{tf-state-file-staging}}
-    region_name: {{aws-region}}
+    bucket: ((tf-state-bucket-staging))
+    versioned_file: ((tf-state-file-staging))
+    region_name: ((aws-region))
 
 - name: terraform-yaml-production
   type: s3-iam
   source:
-    bucket: {{tf-state-bucket-production}}
-    versioned_file: {{tf-state-file-production}}
-    region_name: {{aws-region}}
+    bucket: ((tf-state-bucket-production))
+    versioned_file: ((tf-state-file-production))
+    region_name: ((aws-region))
 
 - name: slack
   type: slack-notification
   source:
-    url: {{slack-webhook-url}}
+    url: ((slack-webhook-url))
 
 - name: cg-s3-secureproxy-release
   source:
