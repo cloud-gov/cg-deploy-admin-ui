@@ -7,6 +7,9 @@ releases:
 - name: secureproxy
   version: latest
 
+packages:
+- ruby-3.2.1
+
 update:
   canaries: 1
   canary_watch_time: 30000-600000
